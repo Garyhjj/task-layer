@@ -1,0 +1,30 @@
+{
+  "name": "task-layer",
+  "version": "0.0.1",
+  "description": "a layer for task inform",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Garyhjj/task-layer.git"
+  },
+  "keywords": [
+    "rxjs",
+    "layer"
+  ],
+  "author": "Garyhjj",
+  "license": "ISC",
+  "dependencies": {
+    "rxjs": "5.5.3"
+  },
+  "devDependencies": {
+    "@types/node": "8.0.53",
+    "typescript": "2.6.2"
+  },
+  "bugs": {
+    "url": "https://github.com/Garyhjj/task-layer/issues"
+  },
+  "homepage": "https://github.com/Garyhjj/task-layer#readme"
+}
