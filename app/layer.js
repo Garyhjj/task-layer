@@ -1,44 +1,33 @@
 "use strict";
 /**
  * 层级对象
- * 可广播,可接受下一层回复,可产生下一层对象,接受回复时可在回调函数中,调用第二个形参方法,继续向所有上层回复
- * version: '0.01'
+ * 可广播,每层内有一个任务发布方，和一个接收方，可接受下一层回复,可产生下一层对象,接受回复时可在回调函数中,调用第二个形参方法,继续向所有上层回复
+ * version: '0.0.2'
  * name: 'layer.ts'
- * author: 'gary.h'
- * 2017-11-17
+ * author: 'Garyhjj'
+ * 2017-12-03
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 var Subject_1 = require("rxjs/Subject");
+var index_1 = require("./listener/index");
+var index_2 = require("./informer/index");
 var Layer = /** @class */ (function () {
     function Layer() {
-        this.informer = new Subject_1.Subject();
-        this.listener = new Subject_1.Subject();
+        this.first = new Subject_1.Subject();
+        this.secend = new Subject_1.Subject();
     }
-    Layer.prototype.inform = function (target) {
-        this.informer.next(target);
+    Layer.prototype.getInformer = function () {
+        return this.informer ? this.informer : new index_2.Informer(this.secend, this.first, this);
     };
-    Layer.prototype.dealWithInform = function (target, cb) {
-        return this.informer.asObservable().filter(function (name) { return name === target; })
-            .subscribe(function () { return cb(); });
-    };
-    Layer.prototype.reponse = function (data) {
-        this.listener.next(data);
-    };
-    Layer.prototype.dealWithResponse = function (cb, emit) {
-        var _this = this;
-        if (emit === void 0) { emit = true; }
-        return this.listener.asObservable().subscribe(function (data) {
-            cb(data, function (res) {
-                emit && _this.responseToTopLayer(res);
-            });
-        });
+    Layer.prototype.getListener = function () {
+        return this.listener ? this.listener : new index_1.Listener(this.first, this.secend);
     };
     Layer.prototype.responseToTopLayer = function (res) {
         if (!res)
             return;
         var topLayers = this.topLayers;
         if (topLayers && topLayers.size > 0) {
-            topLayers.forEach(function (layer) { return layer.reponse(res); });
+            topLayers.forEach(function (layer) { return layer.getListener().send(res); });
         }
     };
     Layer.prototype.addTopLayer = function (layer) {

@@ -1,46 +1,40 @@
 /**
  * 层级对象
- * 可广播,可接受下一层回复,可产生下一层对象,接受回复时可在回调函数中,调用第二个形参方法,继续向所有上层回复
- * version: '0.01'
+ * 可广播,每层内有一个任务发布方，和一个接收方，可接受下一层回复,可产生下一层对象,接受回复时可在回调函数中,调用第二个形参方法,继续向所有上层回复
+ * version: '0.0.2'
  * name: 'layer.ts'
- * author: 'gary.h'
- * 2017-11-17
+ * author: 'Garyhjj'
+ * 2017-12-03
  */
 
 import { Subject } from 'rxjs/Subject';
-import { Observable } from 'rxjs';
+import { Listener } from './listener/index';
+import { Informer } from './informer/index';
 
 export class Layer {
-    private informer:Subject<any>;
-    private listener:Subject<any>;
+    private informer:Informer;
+    private first:Subject<any>;
+    private secend:Subject<any>;
+    private listener:Listener;
+    
     private topLayers:Set<Layer>;
     constructor() {
-        this.informer = new Subject();
-        this.listener = new Subject();
+        this.first = new Subject();
+        this.secend = new Subject();
     }
 
-    inform(target:any) {
-        this.informer.next(target);
+    getInformer() {
+        return this.informer?this.informer:new Informer(this.secend,this.first,this);
     }
-    dealWithInform(target:any,cb:Function) {
-        return this.informer.asObservable().filter((name) => name === target)
-        .subscribe(() => cb())
+    getListener() {
+        return this.listener?this.listener:new Listener(this.first,this.secend);
     }
-    reponse(data:any) {
-        this.listener.next(data);
-    }
-    dealWithResponse(cb:Function,emit:boolean=true) {
-        return this.listener.asObservable().subscribe((data) => {
-            cb(data,(res:any) =>{
-                emit && this.responseToTopLayer(res);
-            });
-        });
-    }
+
     responseToTopLayer(res:any) {
         if(!res) return;
         let topLayers = this.topLayers;
         if(topLayers && topLayers.size>0) {
-            topLayers.forEach((layer) => layer.reponse(res))
+            topLayers.forEach((layer) => layer.getListener().send(res))
         }
     }
     addTopLayer(layer:Layer) {

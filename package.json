@@ -1,6 +1,6 @@
 {
   "name": "task-layer",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "a layer for task inform",
   "main": "index.js",
   "scripts": {
